@@ -4,7 +4,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 const AuthRoute = ({ redirectPath = "/signup", children }) => {
   const [user] = useAuthState(auth);
-  if (!user || !user.isOura) {
+  if (!user) {
     console.log("user", user);
     return <Navigate to={redirectPath} replace />;
   }
