@@ -15,6 +15,8 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import ResetPassword from './pages/ResetPassword';
 import Chat from './pages/chat';
+import Terms from './partials/TermsOfService';
+import PrivacyPolicy from './partials/PrivacyPolicy';
 
 function App() {
 
@@ -43,6 +45,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/chat" element={<Chat/>} />
+        <Route path="/terms-of-service" element={<Terms/>} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy/>} />
       </Routes>
     </>
   );
