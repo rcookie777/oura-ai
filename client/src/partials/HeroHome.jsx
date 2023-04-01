@@ -1,32 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { AuthContext } from '../utils/AuthContext';
 // import Modal from '../utils/Modal';
 
 import HeroImage from '../images/hero-image.png';
-import Api from '../utils/Api';
+// import Api from '../utils/Api';
 
 
 function HeroHome() {
   const [data, setData] = useState({});
-  const [accessToken, setAccessToken] = useState("");
+  const {setAccessToken} = React.useContext(AuthContext);
 
   function callApi() {
     // Make a GET request to the server-side API endpoint
     console.log("Calling API")
-    fetch("https://us-central1-oura-ai.cloudfunctions.net/app/OuraAuth/data")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // Update the state with the data returned from the server-side API
-        setData(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem fetching the data: ", error);
-      });
+    const authorizationUrl = `https://cloud.ouraring.com/oauth/authorize?client_id=XYNUJQWZMUWS4PLE&state=XXX&redirect_uri=https%3A%2F%2Foura-ai.web.app%2Fchat&response_type=token`;
+    window.location.href = authorizationUrl;
   }
+  
   useEffect(() => {
     // Check if the URL contains an access token
     const urlParams = new URLSearchParams(window.location.hash.substr(1));
@@ -37,7 +27,6 @@ function HeroHome() {
       console.log("accessToken", accessToken);
     }
   }, []);
-
   
   return (
     <section className="relative">
@@ -72,9 +61,9 @@ function HeroHome() {
               </p>
               <div className="max-w-xs mx-auto sm:max-w-none sm:flex sm:justify-center" data-aos="zoom-y-out" data-aos-delay="300">
                 <div onClick={ callApi }>
-                  <a className="btn text-white bg-blue-600 hover:bg-blue-700 w-full mb-4 sm:w-auto sm:mb-0" href="">
+                  <div className="btn text-white bg-blue-600 hover:bg-blue-700 w-full mb-4 sm:w-auto sm:mb-0" >
                     Chat
-                  </a>
+                  </div>
                 </div>
                 <div>
                   <a className="btn text-white bg-gray-900 hover:bg-gray-800 w-full sm:w-auto sm:ml-4" href="#0">

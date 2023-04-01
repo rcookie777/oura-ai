@@ -5,11 +5,14 @@ const functions = require("firebase-functions");
 //
 
 const express = require("express");
-const cors = require("cors");
 const app = express();
+const Data = require("./routes/Data");
+const cors = require("cors");
 
-app.use(cors());
-const OuraAuth = require("./routes/OuraAuth");
-app.use("/OuraAuth", OuraAuth);
+app.use(cors({origin: true}));
+
+
+app.use("/data", Data);
+
 
 exports.app = functions.https.onRequest(app);

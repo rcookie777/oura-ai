@@ -1,10 +1,56 @@
-import React from 'react';
+import React,{useEffect,useState} from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 import Header from '../partials/Header';
 import Banner from '../partials/Banner';
+import {auth,signInWithGoogle,logInWithEmailAndPassword} from '../../../Firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 function SignIn() {
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [user, loading] = useAuthState(auth);
+  const navigate = useNavigate();
+
+  const doLogin = () => {
+    setLoginLoading(true);
+    if (email === "" && password === "") {
+      toast.error("Please Provide Login");
+      setLoginLoading(false);
+    } else {
+      try {
+        logInWithEmailAndPassword(email, password);
+      } catch (error) {
+        toast.error(error.message);
+        setLoginLoading(false);
+      }
+      if (user) {
+        setTimeout(() => {
+          toast.success("Login Successfully");
+          navigate("/", { replace: true });
+          setLoginLoading(false);
+        }, 2000);
+      } else {
+        toast.error("Invalid Login");
+        setLoginLoading(false);
+      }
+    };
+  };
+
+  useEffect(() => {
+    if (user) {
+      setTimeout(() => {
+        toast.success("Login Successfully");
+        navigate("/", { replace: true });
+        setLoginLoading(false);
+      }, 2000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading]);
+
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
 
@@ -29,7 +75,7 @@ function SignIn() {
                   <div className="flex flex-wrap -mx-3 mb-4">
                     <div className="w-full px-3">
                       <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="email">Email</label>
-                      <input id="email" type="email" className="form-input w-full text-gray-800" placeholder="Enter your email address" required />
+                      <input onChange={(e) => setEmail(e.target.value)} value={email} id="email" type="email" className="form-input w-full text-gray-800" placeholder="Enter your email address" required />
                     </div>
                   </div>
                   <div className="flex flex-wrap -mx-3 mb-4">
@@ -38,7 +84,7 @@ function SignIn() {
                         <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="password">Password</label>
                         <Link to="/reset-password" className="text-sm font-medium text-blue-600 hover:underline">Having trouble signing in?</Link>
                       </div>
-                      <input id="password" type="password" className="form-input w-full text-gray-800" placeholder="Enter your password" required />
+                      <input onChange={(e) => setPassword(e.target.value)} id="password" type="password" className="form-input w-full text-gray-800" placeholder="Enter your password" required />
                     </div>
                   </div>
                   <div className="flex flex-wrap -mx-3 mb-4">
@@ -53,7 +99,7 @@ function SignIn() {
                   </div>
                   <div className="flex flex-wrap -mx-3 mt-6">
                     <div className="w-full px-3">
-                      <button className="btn text-white bg-blue-600 hover:bg-blue-700 w-full">Sign in</button>
+                      <button onClick={doLogin} type="button" className="btn text-white bg-blue-600 hover:bg-blue-700 w-full">Sign in</button>
                     </div>
                   </div>
                 </form>
@@ -75,7 +121,7 @@ function SignIn() {
                   </div>
                   <div className="flex flex-wrap -mx-3">
                     <div className="w-full px-3">
-                      <button className="btn px-0 text-white bg-red-600 hover:bg-red-700 w-full relative flex items-center">
+                      <button onClick={signInWithGoogle} className="btn px-0 text-white bg-red-600 hover:bg-red-700 w-full relative flex items-center">
                         <svg className="w-4 h-4 fill-current text-white opacity-75 flex-shrink-0 mx-4" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                           <path d="M7.9 7v2.4H12c-.2 1-1.2 3-4 3-2.4 0-4.3-2-4.3-4.4 0-2.4 2-4.4 4.3-4.4 1.4 0 2.3.6 2.8 1.1l1.9-1.8C11.5 1.7 9.9 1 8 1 4.1 1 1 4.1 1 8s3.1 7 7 7c4 0 6.7-2.8 6.7-6.8 0-.5 0-.8-.1-1.2H7.9z" />
                         </svg>
