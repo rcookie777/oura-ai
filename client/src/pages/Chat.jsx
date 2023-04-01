@@ -11,8 +11,9 @@ export default function Chat() {
 
     useEffect(() => {
         // Check if the URL contains an access token
-        const urlParams = new URLSearchParams(window.location.hash.substr(1));
-        const accessToken = urlParams.get("access_token");
+        // const urlParams = new URLSearchParams(window.location.hash.substr(1));
+        // const accessToken = urlParams.get("access_token");
+        const accessToken = "YPJMGUJF3IGYDNH5JBITXGP23HW23NT3"
         if (accessToken) {
           // Save the access token in the state
           setAccessToken(accessToken);

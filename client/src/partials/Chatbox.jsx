@@ -1,6 +1,8 @@
-import React, { useEffect,useState,useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../utils/AuthContext";
-import {getPersonalData} from "../utils/data";
+import { getPersonalData, getSleepData, getAllSleepData } from "../utils/data";
+import { fetchResponse } from "../utils/ChatGPT";
+import { parseSleepData } from "../utils/DataParse";
 
 
 function ChatBox() {
@@ -8,30 +10,68 @@ function ChatBox() {
     const [weight, setWeight] = useState("");
     const [height, setHeight] = useState("");
     const [age, setAge] = useState("");
+    const [sex, setSex] = useState("");
+    const [email, setEmail] = useState("");
     const { accessToken } = useContext(AuthContext);
 
-    // const { accessToken } = useContext(AuthContext);
-    // console.log("accessToken in chatbox", accessToken)
+    const [startDate, setStartDate] = useState("2023-03-01");
+    const [endDate, setEndDate] = useState("2023-03-07");
+    const [sleepData, setSleepData] = useState(null);
+
+    const [input, setInput] = useState("");
+    const [response, setResponse] = useState(null);
+
+    const [ouraData, setOuraData] = useState(null);
+
 
     useEffect(() => {
 
         console.log("AccessToken in chatbox", accessToken)
 
         async function fetchPersonalData() {
-          try {
-            const data = await getPersonalData(accessToken);
-            setPersonalData(data);
-            setWeight(data.weight);
-            setHeight(data.height);
-            setAge(data.age);
-          } catch (error) {
-            console.error(error);
-          }
+            try {
+                const data = await getPersonalData(accessToken);
+                setPersonalData(data);
+                setWeight(data.weight);
+                setHeight(data.height);
+                setAge(data.age);
+                setSex(data.biological_sex)
+                setEmail(data.email)
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        async function fetchSleep() {
+            console.log("Sending data to getSleepData", accessToken, startDate, endDate)
+            try {
+                const data = await getAllSleepData(accessToken, startDate, endDate);
+                setSleepData(data);
+            } catch (error) {
+                console.error(error);
+            }
         }
         fetchPersonalData();
-      }, [accessToken]);
-    
+        fetchSleep();
+    }, [accessToken, startDate, endDate]);
+
     console.log("personalData", personalData);
+    console.log("sleepData", sleepData);
+
+
+
+    async function getResponse() {
+        try {
+            const ouraData = parseSleepData(sleepData);
+            console.log("sending data to fetchResponse",ouraData)
+            console.log("Sending data to fetchResponse", input)
+            const response = await fetchResponse(input,ouraData);
+            setResponse(response);
+            console.log("Response", response);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     return (
         <>
             <div className="flex h-screen antialiased text-gray-800">
@@ -91,19 +131,48 @@ function ChatBox() {
                                     <div className="ml-2 text-sm font-semibold">{weight}</div>
                                 </button>
                             </div>
+                            <div className="flex flex-col space-y-1 mt-4 -mx-2">
+                                <button
+                                    className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
+                                >
+                                    <div
+                                        className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                    >
+                                        S
+                                    </div>
+                                    <div className="ml-2 text-sm font-semibold">{sex}</div>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div className="flex flex-col flex-auto h-full p-6">
                         <div
                             className="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full p-4"
                         >
+                            <div className="relative ml-3 text-sm bg-white mt-10 py-2 px-4 shadow rounded-xl min-w-fit">
+                                <div className="flex flex-row items-center justify-between">
+                                    <div className="flex flex-row items-center justify-between">
+                                        <div>Welcome to Oura.ai, {email}! How can I help you with your lifestyle, health, and sleep? Please ask me a question and I'll do my best to provide an answer.</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div className="flex flex-col h-full overflow-x-auto mb-4">
                                 <div className="flex flex-col h-full">
+                                    {response ? (<div className="relative ml-3 text-sm bg-white mt-10 py-2 px-4 shadow rounded-xl min-w-fit">
+                                        <div className="flex flex-row items-center justify-between">
+                                            <div className="flex flex-row items-center justify-between">
+                                                <div>{response}</div>
+                                            </div>
+                                        </div>
+                                    </div>) : (<div>{response}</div>)}
+
                                 </div>
+
                             </div>
                             <div
                                 className="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4"
                             >
+
                                 <div>
                                     <button
                                         className="flex items-center justify-center text-gray-400 hover:text-gray-600"
@@ -127,7 +196,9 @@ function ChatBox() {
                                 <div className="flex-grow ml-4">
                                     <div className="relative w-full">
                                         <input
+                                            onChange={(e) => setInput(e.target.value)}
                                             type="text"
+                                            id="chat-input"
                                             className="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
                                         />
                                         <button
@@ -152,6 +223,11 @@ function ChatBox() {
                                 </div>
                                 <div className="ml-4">
                                     <button
+                                        onClick={() => {
+                                            getResponse();
+                                            document.getElementById("chat-input").value = "";
+                                        }}
+                                        type="button"
                                         className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
                                     >
                                         <span>Send</span>

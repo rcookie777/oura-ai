@@ -34,3 +34,41 @@ export const getPersonalData = async (accessToken) => {
   };
   
 
+export const getSleepData = async (accessToken,startDate,endDate) => {
+    const Token = accessToken
+    console.log("Token in getPersonalData",Token)
+    const requestData = { Token };
+    const dt = {accessToken: Token, startDate: startDate, endDate: endDate}
+    console.log("sending data",dt)
+    const apiUrl = "https://us-central1-oura-ai.cloudfunctions.net/app/sleep";
+    try {
+        const response = await axios.post(apiUrl, dt);
+        const sleepData = response.data;
+        console.log("sleepData",sleepData)
+        return sleepData;
+        } catch (error) {
+        console.error(error);
+        throw new Error("Error retrieving data from Oura API");
+        }
+    };
+
+export const getAllSleepData = async (accessToken,startDate,endDate) => {
+        const Token = accessToken
+        console.log("Token in getPersonalData",Token)
+        const requestData = { Token };
+        const dt = {accessToken: Token, startDate: startDate, endDate: endDate}
+        console.log("sending data",dt)
+        const apiUrl = "https://us-central1-oura-ai.cloudfunctions.net/app/sleepavg";
+        try {
+            const response = await axios.post(apiUrl, dt);
+            const sleepData = response.data;
+            console.log("sleepData",sleepData)
+            return sleepData;
+            } catch (error) {
+            console.error(error);
+            throw new Error("Error retrieving data from Oura API");
+            }
+};
+
+
+    
