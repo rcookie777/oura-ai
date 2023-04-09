@@ -4,15 +4,9 @@ import { getPersonalData, getSleepData, getAllSleepData } from "../utils/data";
 import { fetchResponse } from "../utils/ChatGPT";
 import { parseSleepData } from "../utils/DataParse";
 
-
 function ChatBox() {
+    const { accessToken,setAccessToken } = React.useContext(AuthContext);
     const [personalData, setPersonalData] = useState(null);
-    const [weight, setWeight] = useState("");
-    const [height, setHeight] = useState("");
-    const [age, setAge] = useState("");
-    const [sex, setSex] = useState("");
-    const [email, setEmail] = useState("");
-    const { accessToken } = useContext(AuthContext);
     
     const [startDate, setStartDate] = useState("2023-03-01");
     const [endDate, setEndDate] = useState("2023-03-07");
@@ -24,6 +18,19 @@ function ChatBox() {
     const chatContainerRef = useRef(null);
     const [ouraData, setOuraData] = useState(null);
 
+    useEffect(() => {
+        // Check if the URL contains an access token
+        // const urlParams = new URLSearchParams(window.location.hash.substr(1));
+        // const accessToken = urlParams.get("access_token");
+        const accessToken = "YPJMGUJF3IGYDNH5JBITXGP23HW23NT3"
+        if (accessToken) {
+          // Save the access token in the state
+          setAccessToken(accessToken);
+          console.log("accessToken set from chatbox", accessToken);
+        }
+      }, []);
+    
+
     function sendMessage() {
         const timestamp = new Date().toISOString();
         setUserMessages((prevMessages) => [...prevMessages, { text: input, timestamp, type: "user" }]);
@@ -32,63 +39,47 @@ function ChatBox() {
     }
 
     useEffect(() => {
-        if (email) {
-            const timestamp = new Date().toISOString();
-            setResponse((prevResponse) => [
-                ...prevResponse,
-                {
-                    text: `Welcome to Oura.ai, ${email}! How can I help you with your lifestyle, health, and sleep? Please ask me a question and I'll do my best to provide an answer.`,
-                    timestamp,
-                    type: "response",
-                },
-            ]);
-        }
-    }, [email]);
-    
-    useEffect(() => {
-        console.log('using effect for things changing');
-
-        console.log("AccessToken in chatbox", accessToken)
-
         async function fetchPersonalData() {
             try {
                 const data = await getPersonalData(accessToken);
                 setPersonalData(data);
-                setWeight(data.weight);
-                setHeight(data.height);
-                setAge(data.age);
-                setSex(data.biological_sex)
-                setEmail(data.email)
-                console.log('```````````````````');
+                const timestamp = new Date().toISOString();
+                setResponse((prevResponse) => [
+                    ...prevResponse,
+                    {
+                        text: `Welcome to Oura.ai, ${data.email}! How can I help you with your lifestyle, health, and sleep? Please ask me a question and I'll do my best to provide an answer.`,
+                        timestamp,
+                        type: "response",
+                    },
+                ]);
                 console.log(data);
-                console.log('```````````````````');
             } catch (error) {
                 console.error(error);
             }
         }
         async function fetchSleep() {
-            console.log("Sending data to getSleepData", accessToken, startDate, endDate)
             try {
                 const data = await getAllSleepData(accessToken, startDate, endDate);
                 setSleepData(data);
+                const ouraData = parseSleepData(data);
+                setOuraData(ouraData);
             } catch (error) {
                 console.error(error);
             }
         }
-        fetchPersonalData();
-        fetchSleep();
-    }, [accessToken, startDate, endDate]);
+        // Call fetchPersonalData and fetchSleep only if accessToken is available
+        if (accessToken) {
+            fetchPersonalData();
+            fetchSleep();
+        }
+    }, [accessToken]);
 
     useEffect(() => {
         scrollToBottom();
     }, [userMessages, response]);
 
-    console.log("personalData", personalData);
-    console.log("sleepData", sleepData);
-
     async function getResponse() {
         try {
-            const ouraData = parseSleepData(sleepData);
             const responseText = await fetchResponse(input, ouraData);
             const timestamp = new Date().toISOString();
             setResponse((prevResponse) => [...prevResponse, { text: responseText, timestamp, type: "response" }]);
@@ -115,16 +106,13 @@ function ChatBox() {
                 <div className="flex flex-row h-full w-full overflow-x-hidden">
                     <div className="flex flex-col py-8 pl-6 pr-2 w-64 bg-white flex-shrink-0">
                         <div className="flex flex-row items-center justify-center h-12 w-full">
-                            <div
-                                className="flex items-center justify-center rounded-2xl text-indigo-700 bg-indigo-100 h-10 w-10"
-                            >
+                            <div className="flex items-center justify-center rounded-2xl text-indigo-700 bg-indigo-100 h-10 w-10" >
                                 <svg
                                     className="w-6 h-6"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
+                                    xmlns="http://www.w3.org/2000/svg" >
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -145,47 +133,33 @@ function ChatBox() {
                                 >{accessToken}</span>
                             </div>
                             <div className="flex flex-col space-y-1 mt-4 -mx-2">
-                                <button
-                                    className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                                >
-                                    <div
-                                        className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                                    >
-                                        A
-                                    </div>
-                                    <div className="ml-2 text-sm font-semibold">{age}</div>
+                                <button className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2" >
+                                    <div className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full" > A </div>
+                                    <div className="ml-2 text-sm font-semibold">{personalData?.age}</div>
                                 </button>
                             </div>
                             <div className="flex flex-col space-y-1 mt-4 -mx-2">
-                                <button
-                                    className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                                >
-                                    <div
-                                        className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                                    >
-                                        W
-                                    </div>
-                                    <div className="ml-2 text-sm font-semibold">{weight}</div>
+                                <button className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2" >
+                                    <div className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full" > W </div>
+                                    <div className="ml-2 text-sm font-semibold">{personalData?.weight}</div>
                                 </button>
                             </div>
                             <div className="flex flex-col space-y-1 mt-4 -mx-2">
-                                <button
-                                    className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                                >
-                                    <div
-                                        className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                                    >
-                                        S
-                                    </div>
-                                    <div className="ml-2 text-sm font-semibold">{sex}</div>
+                                <button className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2" >
+                                    <div className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full" > H </div>
+                                    <div className="ml-2 text-sm font-semibold">{personalData?.height}</div>
+                                </button>
+                            </div>
+                            <div className="flex flex-col space-y-1 mt-4 -mx-2">
+                                <button className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2" >
+                                    <div className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full" > S </div>
+                                    <div className="ml-2 text-sm font-semibold">{personalData?.biological_sex}</div>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div className="flex flex-col flex-auto h-full p-6">
-                        <div
-                            className="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full p-4"
-                        >
+                        <div className="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full p-4" >
                             <div className="flex flex-col h-full overflow-x-auto mb-4" ref={chatContainerRef}>
                             <div className="flex flex-col h-full">
                                     {combineAndSortMessages().map((item, index) => (
@@ -206,21 +180,15 @@ function ChatBox() {
                                     ))}
                                 </div>
                             </div>
-                            <div
-                                className="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4"
-                            >
-
+                            <div className="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4" >
                                 <div>
-                                    <button
-                                        className="flex items-center justify-center text-gray-400 hover:text-gray-600"
-                                    >
+                                    <button className="flex items-center justify-center text-gray-400 hover:text-gray-600" >
                                         <svg
                                             className="w-5 h-5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
+                                            xmlns="http://www.w3.org/2000/svg" >
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
@@ -242,18 +210,14 @@ function ChatBox() {
                                         value={input}
                                         type="text"
                                         id="chat-input"
-                                        className="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
-                                    />
-                                        <button
-                                            className="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"
-                                        >
+                                        className="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
+                                        <button className="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600" >
                                             <svg
                                                 className="w-6 h-6"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
+                                                xmlns="http://www.w3.org/2000/svg" >
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
@@ -268,8 +232,7 @@ function ChatBox() {
                                     <button
                                         onClick={sendMessage}
                                         type="button"
-                                        className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
-                                    >
+                                        className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0" >
                                         <span>Send</span>
                                         <span className="ml-2">
                                             <svg
@@ -277,8 +240,7 @@ function ChatBox() {
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
+                                                xmlns="http://www.w3.org/2000/svg" >
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"

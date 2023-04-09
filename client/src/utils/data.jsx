@@ -2,19 +2,9 @@ import axios from "axios";
 import { AuthContext } from "./AuthContext";
 import React from "react";
 
-// const getAccessToken = () => {
-//   console.log("accessToken", accessToken);
-//   return accessToken;
-// };
-
 export const getPersonalData = async (accessToken) => {
-    const Token = accessToken
-    console.log("Token in getPersonalData",Token)
-    const requestData = { Token };
-
-    const dt = {accessToken: Token}
-    console.log("sending data",dt)
-    const apiUrl = "https://us-central1-oura-ai.cloudfunctions.net/app/data";
+    const dt = {accessToken: accessToken}
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}app/data`;
     try {
       const response = await axios.post(apiUrl, dt);
       const personalData = response.data;
@@ -29,18 +19,15 @@ export const getPersonalData = async (accessToken) => {
       return mappedData;
     } catch (error) {
       console.error(error);
-      throw new Error("Error retrieving data from Oura API");
+      throw new Error("Error retrieving personal data from Oura API");
     }
   };
-  
 
 export const getSleepData = async (accessToken,startDate,endDate) => {
-    const Token = accessToken
-    console.log("Token in getPersonalData",Token)
-    const requestData = { Token };
-    const dt = {accessToken: Token, startDate: startDate, endDate: endDate}
+    const dt = {accessToken: accessToken, startDate: startDate, endDate: endDate}
     console.log("sending data",dt)
-    const apiUrl = "https://us-central1-oura-ai.cloudfunctions.net/app/sleep";
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}app/sleep`;
+    console.log('apiUrl:', apiUrl);
     try {
         const response = await axios.post(apiUrl, dt);
         const sleepData = response.data;
@@ -48,27 +35,21 @@ export const getSleepData = async (accessToken,startDate,endDate) => {
         return sleepData;
         } catch (error) {
         console.error(error);
-        throw new Error("Error retrieving data from Oura API");
+        throw new Error("Error retrieving sleep data from Oura API");
         }
     };
 
 export const getAllSleepData = async (accessToken,startDate,endDate) => {
-        const Token = accessToken
-        console.log("Token in getPersonalData",Token)
-        const requestData = { Token };
-        const dt = {accessToken: Token, startDate: startDate, endDate: endDate}
+        const dt = {accessToken: accessToken, startDate: startDate, endDate: endDate}
         console.log("sending data",dt)
-        const apiUrl = "https://us-central1-oura-ai.cloudfunctions.net/app/sleepavg";
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}app/sleepavg`;
         try {
             const response = await axios.post(apiUrl, dt);
             const sleepData = response.data;
-            console.log("sleepData",sleepData)
+            console.log("all sleep data",sleepData)
             return sleepData;
             } catch (error) {
             console.error(error);
-            throw new Error("Error retrieving data from Oura API");
+            throw new Error("Error retrieving all sleep data from Oura API");
             }
 };
-
-
-    

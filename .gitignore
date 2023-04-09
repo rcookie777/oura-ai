@@ -62,5 +62,6 @@ node_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
+#mac GUI files.
+**/.DS_Store
+.DS_Store
