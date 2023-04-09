@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import { AuthContext } from "../utils/AuthContext";
 import { getPersonalData, getSleepData, getAllSleepData } from "../utils/data";
 import { fetchResponse } from "../utils/ChatGPT";
-import { parseSleepData } from "../utils/DataParse";
 
 function ChatBox() {
     const { accessToken,setAccessToken } = React.useContext(AuthContext);
@@ -16,7 +15,6 @@ function ChatBox() {
     const [userMessages, setUserMessages] = useState([]);
     const [response, setResponse] = useState([]);
     const chatContainerRef = useRef(null);
-    const [ouraData, setOuraData] = useState(null);
 
     useEffect(() => {
         // Check if the URL contains an access token
@@ -61,8 +59,6 @@ function ChatBox() {
             try {
                 const data = await getAllSleepData(accessToken, startDate, endDate);
                 setSleepData(data);
-                const ouraData = parseSleepData(data);
-                setOuraData(ouraData);
             } catch (error) {
                 console.error(error);
             }
@@ -80,7 +76,7 @@ function ChatBox() {
 
     async function getResponse() {
         try {
-            const responseText = await fetchResponse(input, ouraData);
+            const responseText = await fetchResponse(input, sleepData);
             const timestamp = new Date().toISOString();
             setResponse((prevResponse) => [...prevResponse, { text: responseText, timestamp, type: "response" }]);
         } catch (error) {
