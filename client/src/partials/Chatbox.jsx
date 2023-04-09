@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { AuthContext } from "../utils/AuthContext";
-import { getPersonalData, getSleepData, getAllSleepData } from "../utils/data";
+import { getOuraData } from "../utils/data";
 import { fetchResponse } from "../utils/ChatGPT";
 
 function ChatBox() {
@@ -37,10 +37,11 @@ function ChatBox() {
     }
 
     useEffect(() => {
-        async function fetchPersonalData() {
+        async function fetchOuraData() {
             try {
-                const data = await getPersonalData(accessToken);
-                setPersonalData(data);
+                const data = await getOuraData(accessToken, startDate, endDate);
+
+                setPersonalData(data.personal_info);
                 const timestamp = new Date().toISOString();
                 setResponse((prevResponse) => [
                     ...prevResponse,
@@ -55,18 +56,8 @@ function ChatBox() {
                 console.error(error);
             }
         }
-        async function fetchSleep() {
-            try {
-                const data = await getAllSleepData(accessToken, startDate, endDate);
-                setSleepData(data);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-        // Call fetchPersonalData and fetchSleep only if accessToken is available
         if (accessToken) {
-            fetchPersonalData();
-            fetchSleep();
+            fetchOuraData();
         }
     }, [accessToken]);
 
