@@ -5,12 +5,11 @@ const API_KEY = "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";
 export const fetchResponse = async (input, context) => {
     const contextData = JSON.stringify(context);
     const gptPrompt=[
-        {"role": "system", "content": `This is the users health data: ${contextData}`},
-        {"role": "user", "content": `As Oura Ai respond to this question "${input}"`},
+        {"role": "user", "content": `This is my health data: ${contextData}`},
+        {"role": "user", "content": `As an expert in health andd sleep respond to this input based on my health data "${input}" and suggest another question to ask for me to learn more about my health.`},
         // {"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
         //{"role": "user", "content": "Where was it played?"}
     ];
-    console.log(gptPrompt)
     try{
         const response = await axios.post(
             "https://api.openai.com/v1/chat/completions",
@@ -28,12 +27,7 @@ export const fetchResponse = async (input, context) => {
             },
             }
         ).catch(error => console.log(error.response));
-
-        console.log("OPENAI",response);
-
         const text = response.data.choices[0].message.content;
-        // Add a delay of 1 second before returning the response
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
         return text;
     } catch (error) {

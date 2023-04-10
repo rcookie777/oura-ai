@@ -24,7 +24,6 @@ function ChatBox() {
         if (accessToken) {
           // Save the access token in the state
           setAccessToken(accessToken);
-          console.log("accessToken set from chatbox", accessToken);
         }
       }, []);
     
@@ -51,7 +50,7 @@ function ChatBox() {
                         type: "response",
                     },
                 ]);
-                console.log(data);
+                setSleepData(data);
             } catch (error) {
                 console.error(error);
             }
