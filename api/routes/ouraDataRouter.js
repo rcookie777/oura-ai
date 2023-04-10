@@ -4,14 +4,13 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 const bodyParser = require("body-parser");
-const { FORMAT, fetchSleepData, convertData } = require("./ouraHelpers");
+const { FORMAT, fetchSleepData, fetchActivityData } = require("./ouraHelpers");
 router.use(bodyParser.json());
 
 // Modified function to include additional API calls
 async function fetchAndCombineData(accessToken, startDate, endDate) {
   const apiUrls = [
     `https://api.ouraring.com/v2/usercollection/personal_info`,
-    `https://api.ouraring.com/v2/usercollection/daily_activity?start_date=${startDate}&end_date=${endDate}`,
     `https://api.ouraring.com/v2/usercollection/daily_readiness?start_date=${startDate}&end_date=${endDate}`,
     `https://api.ouraring.com/v2/usercollection/heartrate?start_datetime=${startDate}T00:00:00-08:00&end_datetime=${endDate}T00:00:00-08:00`,
     `https://api.ouraring.com/v2/usercollection/session?start_date=${startDate}&end_date=${endDate}`,
@@ -28,13 +27,13 @@ async function fetchAndCombineData(accessToken, startDate, endDate) {
   );
 
   const sleepDataResponse = await fetchSleepData(accessToken, startDate, endDate);
+  const activityDataResponse = await fetchActivityData(accessToken, startDate, endDate);
 
   const data = {};
 
   // Add an array of names for the data keys
   const dataKeys = [
     'personal_info',
-    'daily_activity',
     'daily_readiness',
     'heart_rate',
     'session',
@@ -52,6 +51,7 @@ async function fetchAndCombineData(accessToken, startDate, endDate) {
   });
   
   data.sleep = sleepDataResponse;
+  data.daily_activity = activityDataResponse;
 
   return data;
 }
