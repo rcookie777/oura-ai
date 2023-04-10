@@ -41,6 +41,21 @@ function summarizeActivityData(activityData) {
   });
 }
 
+async function fetchHeartRateData(accessToken, startDate, endDate) {
+  const apiUrl = `https://api.ouraring.com/v2/usercollection/heartrate?start_datetime=${startDate}T00:00:00-08:00&end_datetime=${endDate}T00:00:00-08:00`;
+  const response = await axios.get(apiUrl, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const reducedData = summarizeHeartRateData(response.data.data);
+  return {
+    format: FORMAT,
+    data: reducedData
+  };
+}
+
 async function fetchSleepData(accessToken, startDate, endDate) {
     const apiUrl = `https://api.ouraring.com/v1/sleep?start=${startDate}&end=${endDate}`;
     const response = await axios.get(apiUrl, {
@@ -54,6 +69,46 @@ async function fetchSleepData(accessToken, startDate, endDate) {
       format: FORMAT,
       data: reducedData
     };
+  }
+
+  function summarizeHeartRateData(heartRateData) {
+    const summary = {};
+  
+    heartRateData.forEach(entry => {
+      const date = entry.timestamp.substr(0, 10);
+      if (!summary[date]) {
+        summary[date] = {
+          count: 0,
+          sum: 0,
+          min: Number.MAX_VALUE,
+          max: Number.MIN_VALUE,
+          values: [],
+        };
+      }
+  
+      summary[date].count += 1;
+      summary[date].sum += entry.bpm;
+      summary[date].min = Math.min(summary[date].min, entry.bpm);
+      summary[date].max = Math.max(summary[date].max, entry.bpm);
+      summary[date].values.push(entry.bpm);
+    });
+  
+    for (const date in summary) {
+      const daySummary = summary[date];
+      daySummary.average = daySummary.sum / daySummary.count;
+  
+      const squaredDiffs = daySummary.values.map(value => {
+        const diff = value - daySummary.average;
+        return diff * diff;
+      });
+  
+      daySummary.variance = squaredDiffs.reduce((a, b) => a + b) / daySummary.count;
+      daySummary.standardDeviation = Math.sqrt(daySummary.variance);
+  
+      delete daySummary.values; // Remove values array, as it's not needed in the summary
+    }
+  
+    return summary;
   }
 
   async function fetchActivityData(accessToken, startDate, endDate) {
@@ -73,5 +128,6 @@ async function fetchSleepData(accessToken, startDate, endDate) {
 module.exports = {
   FORMAT,
   fetchSleepData,
-  fetchActivityData
+  fetchActivityData,
+  fetchHeartRateData
 };

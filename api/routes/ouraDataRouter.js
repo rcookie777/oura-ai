@@ -4,7 +4,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 const bodyParser = require("body-parser");
-const { FORMAT, fetchSleepData, fetchActivityData } = require("./ouraHelpers");
+const { FORMAT, fetchSleepData, fetchActivityData, fetchHeartRateData } = require("./ouraHelpers");
 router.use(bodyParser.json());
 
 // Modified function to include additional API calls
@@ -12,7 +12,6 @@ async function fetchAndCombineData(accessToken, startDate, endDate) {
   const apiUrls = [
     `https://api.ouraring.com/v2/usercollection/personal_info`,
     `https://api.ouraring.com/v2/usercollection/daily_readiness?start_date=${startDate}&end_date=${endDate}`,
-    `https://api.ouraring.com/v2/usercollection/heartrate?start_datetime=${startDate}T00:00:00-08:00&end_datetime=${endDate}T00:00:00-08:00`,
     `https://api.ouraring.com/v2/usercollection/session?start_date=${startDate}&end_date=${endDate}`,
     `https://api.ouraring.com/v2/usercollection/workout?start_date=${startDate}&end_date=${endDate}`,
   ];
@@ -28,6 +27,7 @@ async function fetchAndCombineData(accessToken, startDate, endDate) {
 
   const sleepDataResponse = await fetchSleepData(accessToken, startDate, endDate);
   const activityDataResponse = await fetchActivityData(accessToken, startDate, endDate);
+  const heartRateResponse = await fetchHeartRateData(accessToken, startDate, endDate);
 
   const data = {};
 
@@ -35,7 +35,6 @@ async function fetchAndCombineData(accessToken, startDate, endDate) {
   const dataKeys = [
     'personal_info',
     'daily_readiness',
-    'heart_rate',
     'session',
     'workout'
   ];
@@ -52,6 +51,7 @@ async function fetchAndCombineData(accessToken, startDate, endDate) {
   
   data.sleep = sleepDataResponse;
   data.daily_activity = activityDataResponse;
+  data.heart_rate = heartRateResponse;
 
   return data;
 }
