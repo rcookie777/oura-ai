@@ -31,7 +31,7 @@ function ChatBox() {
     function sendMessage() {
         const timestamp = new Date().toISOString();
         setUserMessages((prevMessages) => [...prevMessages, { text: input, timestamp, type: "user" }]);
-        getResponse();
+        getResponse(input, sleepData);
         setInput(""); // Clear the input after sending the message
     }
 
@@ -39,18 +39,20 @@ function ChatBox() {
         async function fetchOuraData() {
             try {
                 const data = await getOuraData(accessToken, startDate, endDate);
-
+                console.log('setting personal data')
                 setPersonalData(data.personal_info);
-                const timestamp = new Date().toISOString();
-                setResponse((prevResponse) => [
-                    ...prevResponse,
-                    {
-                        text: `Welcome to Oura.ai, ${data.email}! How can I help you with your lifestyle, health, and sleep? Please ask me a question and I'll do my best to provide an answer.`,
-                        timestamp,
-                        type: "response",
-                    },
-                ]);
+                //const timestamp = new Date().toISOString();
+                // setResponse((prevResponse) => [
+                //     ...prevResponse,
+                //     {
+                //         text: `Welcome to Oura.ai, ${data.email}! How can I help you with your lifestyle, health, and sleep? Please ask me a question and I'll do my best to provide an answer.`,
+                //         timestamp,
+                //         type: "response",
+                //     },
+                // ]);
                 setSleepData(data);
+                const question = "Provide a summary of my health data including daily readiness, sleep, daily activity, and heart rate and tell me the time period the data covers. After that tell me if my heart rate, sleep, and activity levels are healthy for my sex and age.Then tell me what additional information could I provide you that would help you make recommendations about my health and sleep."
+                getResponse(question, data);
             } catch (error) {
                 console.error(error);
             }
@@ -64,9 +66,9 @@ function ChatBox() {
         scrollToBottom();
     }, [userMessages, response]);
 
-    async function getResponse() {
+    async function getResponse(stringToSend, sleepDataForContext) {
         try {
-            const responseText = await fetchResponse(input, sleepData);
+            const responseText = await fetchResponse(stringToSend, sleepDataForContext);
             const timestamp = new Date().toISOString();
             setResponse((prevResponse) => [...prevResponse, { text: responseText, timestamp, type: "response" }]);
         } catch (error) {
@@ -152,7 +154,7 @@ function ChatBox() {
                                         <div key={index}>
                                             {item.type === "response" ? (
                                                 <div className="ml-3 text-sm bg-gray-200 mt-4 py-2 px-4 shadow rounded-xl min-w-fit">
-                                                    <div>
+                                                    <div class="wrap-with-linebreaks">
                                                         <strong>Oura AI: </strong>
                                                         {item.text}
                                                     </div>

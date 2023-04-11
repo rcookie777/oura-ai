@@ -22,3 +22,8 @@
 [x-cloak=""] {
     display: none;
 }
+
+
+.wrap-with-linebreaks {
+    white-space: pre-wrap;
+  }
