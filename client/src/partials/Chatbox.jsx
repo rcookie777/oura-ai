@@ -32,24 +32,14 @@ function ChatBox() {
         const timestamp = new Date().toISOString();
         setUserMessages((prevMessages) => [...prevMessages, { text: input, timestamp, type: "user" }]);
         getResponse(input, sleepData);
-        setInput(""); // Clear the input after sending the message
+        setInput("");
     }
 
     useEffect(() => {
         async function fetchOuraData() {
             try {
                 const data = await getOuraData(accessToken, startDate, endDate);
-                console.log('setting personal data')
                 setPersonalData(data.personal_info);
-                //const timestamp = new Date().toISOString();
-                // setResponse((prevResponse) => [
-                //     ...prevResponse,
-                //     {
-                //         text: `Welcome to Oura.ai, ${data.email}! How can I help you with your lifestyle, health, and sleep? Please ask me a question and I'll do my best to provide an answer.`,
-                //         timestamp,
-                //         type: "response",
-                //     },
-                // ]);
                 setSleepData(data);
                 const question = "Provide a summary of my health data including daily readiness, sleep, daily activity, and heart rate and tell me the time period the data covers. After that tell me if my heart rate, sleep, and activity levels are healthy for my sex and age.Then tell me what additional information could I provide you that would help you make recommendations about my health and sleep."
                 getResponse(question, data);
@@ -111,15 +101,7 @@ function ChatBox() {
                             </div>
                             <div className="ml-2 font-bold text-2xl">Oura AI</div>
                         </div>
-
                         <div className="flex flex-col mt-8">
-
-                            <div className="flex flex-row items-center justify-between text-xs mt-6">
-                                <span className="font-bold">Your Info</span>
-                                <span
-                                    className="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"
-                                >{accessToken}</span>
-                            </div>
                             <div className="flex flex-col space-y-1 mt-4 -mx-2">
                                 <button className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2" >
                                     <div className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full" > A </div>
@@ -154,7 +136,7 @@ function ChatBox() {
                                         <div key={index}>
                                             {item.type === "response" ? (
                                                 <div className="ml-3 text-sm bg-gray-200 mt-4 py-2 px-4 shadow rounded-xl min-w-fit">
-                                                    <div class="wrap-with-linebreaks">
+                                                    <div className="wrap-with-linebreaks">
                                                         <strong>Oura AI: </strong>
                                                         {item.text}
                                                     </div>
